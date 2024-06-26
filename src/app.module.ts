@@ -1,16 +1,28 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
+import configuration from './config/configuration';
 import { UsersModule } from './users/users.module';
 import { WishesModule } from './wishes/wishes.module';
 import { WishlistsModule } from './wishlists/wishlists.module';
 import { OffersModule } from './offers/offers.module';
-import { User } from './users/user.entity';
-import { Wish } from './wishes/wish.entity';
-import { Wishlist } from './wishlists/wishlist.entity';
-import { Offer } from './offers/offer.entity';
+import * as Joi from 'joi';
+
+const schema = Joi.object({
+  port: Joi.number().integer().default(3000),
+  database: Joi.object({
+    url: Joi.string().pattern(/postgres:\/\/[a-zA-Z]/).required(),
+    port: Joi.number().integer().required(),
+  }),
+});
 @Module({
   imports: [
+    ConfigModule.forRoot({ 
+      validationSchema: schema,
+      load: [configuration],
+      isGlobal: true,
+    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',
@@ -18,8 +30,9 @@ import { Offer } from './offers/offer.entity';
       username: 'student',
       password: 'student',
       database: 'nest_project',
-      entities: [User, Wish, Wishlist, Offer],
-      synchronize: true,
+      //entities: [User, Wish, Wishlist, Offer],
+      autoLoadEntities: true,
+      synchronize: true, //синхронизация с БД
     }),
     UsersModule,
     WishesModule,

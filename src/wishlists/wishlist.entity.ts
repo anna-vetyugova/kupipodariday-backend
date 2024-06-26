@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany } from 'typeorm';
-import { Length } from 'class-validator/types/decorator/string/Length';
+import { Length } from 'class-validator';
 import { User } from 'src/users/user.entity';
 import { Wish } from 'src/wishes/wish.entity';
 

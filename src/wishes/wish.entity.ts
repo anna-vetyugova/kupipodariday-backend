@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany } from 'typeorm';
-import { IsUrl } from 'class-validator/types/decorator/decorators';
+import { IsUrl } from 'class-validator';
 import { Length } from 'class-validator';
 import { User } from 'src/users/user.entity';
 import { Offer } from 'src/offers/offer.entity';
