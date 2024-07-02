@@ -3,14 +3,14 @@ import { Length, IsUrl, IsEmail, IsString, MinLength } from 'class-validator';
 export class UpdateUserDto {
   @IsString()
   @Length(2, 30)
-  readonly username?: string;
+  username?: string;
 
   @IsString()
   @Length(2, 200)
-  readonly about?: string;
+  about?: string;
   
   @IsUrl()
-  readonly avatar?: string;
+  avatar?: string;
 
   @IsString()
   @IsEmail()
@@ -18,5 +18,5 @@ export class UpdateUserDto {
 
   @IsString()
   @MinLength(2)
-  readonly password?: string;
+  password?: string;
 }
