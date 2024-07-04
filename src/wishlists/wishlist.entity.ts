@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 import { Length } from 'class-validator';
 import { User } from 'src/users/user.entity';
 import { Wish } from 'src/wishes/wish.entity';
@@ -25,8 +25,9 @@ export class Wishlist {
   image: string;
 
   @ManyToOne(() => User, user => user.wishlists)
-  user: User;
+  owner: User;
 
-  @OneToMany(() => Wish, wish => wish.wishlist)
+  @ManyToMany(() => Wish, wish => wish.wishlists)
+  @JoinTable()
   items: Wish[];
 }

@@ -1,4 +1,4 @@
-import { IsNumber, IsString, IsUrl, Length } from 'class-validator';
+import { IsArray, IsNumber, IsString, IsUrl, Length } from 'class-validator';
 
 export class UpdateWishlistDto {
   @IsString()
@@ -12,6 +12,6 @@ export class UpdateWishlistDto {
   @IsUrl()
   readonly image?: string;
 
-  @IsNumber({}, { each: true })
-  readonly items?: number[];
+  @IsArray()
+  readonly itemsId?: number[];
 }

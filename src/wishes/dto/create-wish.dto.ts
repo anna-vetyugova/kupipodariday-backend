@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString, IsUrl, Length } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString, IsUrl, Length } from 'class-validator';
 
 export class CreateWishDto {
   @IsNotEmpty()
@@ -16,17 +16,20 @@ export class CreateWishDto {
   @IsNumber({ maxDecimalPlaces: 2 })
   readonly price: number;
 
+  @IsOptional()
   @IsNumber({ maxDecimalPlaces: 2 })
   readonly raised?: number;
 
+  @IsOptional()
   @IsNotEmpty()
   @IsNumber()
   readonly owner: number;
 
   @IsString()
   @Length(1, 1024)
-  readonly description?: string;
+  readonly description: string;
 
+  @IsOptional()
   @IsNumber()
-  readonly copied?: number;
+  readonly copied: number;
 }
