@@ -31,9 +31,9 @@ export class WishesService {
     const wishes = await this.wishRepository.find({
       where: { owner: { id: userId } },
     });
-    if (!wishes.length) {
-      throw new NotFoundException(`Подарки для текущего пользователя не найдены`);
-    }
+    // if (!wishes.length) {
+    //   throw new NotFoundException(`Подарки для текущего пользователя не найдены`);
+    // }
     return wishes;
   }
 
@@ -51,20 +51,21 @@ export class WishesService {
     return wish;
   }
 
-  async findWishById(id: number) {
+  async findWishById(id: number):Promise<Wish> {
     if(!id) {
       throw new BadRequestException(`Отсутсвует ИД подарка`);
     }
     const wish = await this.wishRepository.findOne({
       where: { id },
-      relations: {
-        owner: true,
-        offers: true,
-      },
+      relations: ['owner', 'offers', 'offers.user'],
     });
     if (!wish) {
       throw new NotFoundException(`Подарок не найден`);
     }
+    wish.offers = wish.offers.map(offer => ({
+      ...offer,
+      name: offer.user.username, 
+    }));
     return wish;
   }
 
@@ -78,13 +79,31 @@ export class WishesService {
     return this.wishRepository.save(updatedWish);
   }
 
+  // обновить признак copied у подарока
+  async updateCopiedWish(wishId: number): Promise<Wish> {
+    const wish = await this.findWishById(wishId);
+    const counter = wish.copied;
+    const updatedWish = this.wishRepository.merge(wish, {
+      copied: counter + 1,
+    });
+    return this.wishRepository.save(updatedWish);
+  }
+
+  // обновить сумму скинувшихся на подарок
+  async updateRaisedAmount(wishId: number, raised: number): Promise<Wish> {
+    const wish = await this.findWishById(wishId);
+    const newRaised = Number(wish.raised) + Number(raised);
+    this.wishRepository.merge(wish, { raised: newRaised });
+    return this.wishRepository.save(wish);
+  }
+
   // удалить подарок
-  async deleteWish(wishId: number, userId: number): Promise<void> {
+  async deleteWish(wishId: number, userId: number): Promise<Wish> {
     const wish = await this.findWishById(wishId);
     if (wish.owner.id !== userId) {
       throw new ForbiddenException('Вы не можете удалять чужие подарки');
     }
-    await this.wishRepository.remove(wish);
+    return await this.wishRepository.remove(wish);
   }
 
   //показать последние добавленные подарки
@@ -126,4 +145,42 @@ export class WishesService {
     const wishes = await Promise.all(ids.map(id => this.findWishById(id)));
     return wishes;
   }
+
+  async updateWishWithOffer(id: number, amount: number) {
+    return await this.wishRepository.update({ id }, { raised: amount });
+  }
+
+  // копировать подарок
+  async copyWish(wishId: number, userId: number): Promise<Wish> {
+    // получить данные о подарке по ИД
+    const wish = await this.wishRepository.findOne({
+      select: { 
+        name: true,
+        link: true,
+        image: true,
+        price: true,
+        description: true,
+      },
+      where: { id: wishId },
+    });
+
+    // получить юзера, кто копирует
+    const user = await this.userService.findById(userId);
+    const copiedWish = this.wishRepository.create({
+      name: wish.name,
+      link: wish.link,
+      image: wish.image,
+      price: wish.price,
+      description: wish.description,
+      owner: user,
+      raised: 0, 
+      copied: (wish.copied || 0) + 1, 
+    });
+    
+    // обновим признак copied у оригинального подарка
+    const originWish = await this.updateCopiedWish(wishId);
+
+    return this.wishRepository.save(copiedWish);
+  }
+
 }

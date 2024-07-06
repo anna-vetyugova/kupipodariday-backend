@@ -55,5 +55,13 @@ export class WishlistsService {
     });
   }
 
+  // удалить коллекцию
+  async deleteWishlist(wishlistId: number, userId: number): Promise<Wishlist> {
+    const wishlist = await this.findWisheListById(wishlistId);
+    if (wishlist.owner.id !== userId) {
+      throw new ForbiddenException('Вы не можете удалять чужие коллекции');
+    }
+    return await this.wishlistRepository.remove(wishlist);
+  }
   
 }

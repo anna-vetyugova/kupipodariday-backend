@@ -23,6 +23,11 @@ export class UsersService {
       return this.userRepository.save(user);
     }
 
+    // получить всех пользователей
+    async findAll(): Promise<User[]> {
+      return this.userRepository.find();
+    }
+
     @UseGuards(JwtAuthGuard)
     async findById(id: number):  Promise<User> {
       const user = await this.userRepository.findOneBy({ id });
@@ -34,11 +39,7 @@ export class UsersService {
 
     @UseGuards(JwtAuthGuard)
     async findByEmail(email: string):  Promise<User> {
-      const user = await this.userRepository.findOneBy({ email });
-      if (!user) {
-        throw new NotFoundException(`Пользователь  с ${email} не найден`);
-      }
-      return user;
+      return await this.userRepository.findOneBy({ email });
     }
 
     @UseGuards(JwtAuthGuard)

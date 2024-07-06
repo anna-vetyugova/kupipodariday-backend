@@ -42,13 +42,11 @@ export class WishesController {
 
   // найти последние добавленные
   @Get('last')
-  @UseGuards(JwtAuthGuard)
   findLastWishes() {
     return this.wishService.getLastWishes();
   }
 
   @Get('/top')
-  @UseGuards(JwtAuthGuard)
   getTopWishes() {
     return this.wishService.getTopWishes();
   }
@@ -58,5 +56,12 @@ export class WishesController {
   @UseGuards(JwtAuthGuard)
   findWishById(@Param('id') id: number) {
     return this.wishService.findWishById(id);
+  }
+
+  // скопировать подарок
+  @Post(':id/copy')
+  @UseGuards(JwtAuthGuard)
+  copy(@Param('id') id: number, @AuthUser() user) {
+    return this.wishService.copyWish(id, user.id);
   }
 }

@@ -1,11 +1,9 @@
 import { IsUrl, IsNumber, IsBoolean } from 'class-validator';
+import { User } from 'src/users/user.entity';
 
 export class CreateOfferDto {
   @IsNumber()
-  user: number;
-
-  @IsUrl()
-  item: string;
+  itemId: number;
 
   @IsNumber({ maxDecimalPlaces: 2 })
   amount: number;

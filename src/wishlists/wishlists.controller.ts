@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guard/jwt.auth.guard';
 import { AuthUser } from 'src/common/decorators/user.decorators';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
@@ -28,4 +28,12 @@ export class WishlistsController {
   findWishListById(@Param('id') id: number) {
     return this.wishlistService.findWisheListById(id);
   }
+
+  // удалить коллекцию
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  deleteWish(@Param('id') id: number, @AuthUser() user) {
+    return this.wishlistService.deleteWishlist(id, user.id);
+  }
+  
 }

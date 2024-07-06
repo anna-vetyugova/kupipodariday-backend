@@ -34,12 +34,17 @@ export class UsersController {
     })
   }
 
+  // получить всех пользователей
+  @Get()
+  findAll() {
+    return this.userService.findAll();
+  }
+
   // обновить данные по своему профилю
   @Patch('me')
   async updateOne(@AuthUser() user: User, @Body() updateUserDto: UpdateUserDto): Promise<User> {
     return this.userService.updateOne({ where: { id: user.id } }, updateUserDto);
   }
-
 
   // получить данные профиля по имени
   @Get(':username')
@@ -52,7 +57,7 @@ export class UsersController {
   }
 
   // найти пользователя по почте или имени
-  @Get('find')
+  @Post('find')
   async findMany(@Query('query') query: string) {
     if (!query) {
       throw new BadRequestException(`Для поиска требуется указать или имя пользователя или его электронный адрес`);
@@ -71,15 +76,15 @@ export class UsersController {
     return wishes;
   }
 
-    // получить список подароков пользователя по имени
-    @Get(':username/wishes')
-    async findWishes(@Param('username') userName: string, @AuthUser() user: User): Promise<Wish[]> {
-      const userData = await this.userService.findByName(userName);
-      const wishes = this.wishService.findWishesById(userData.id);
-      if(!wishes) {
-        throw new NotFoundException(`У пользователя нет подароков`);
-      }
-      return wishes;
+  // получить список подароков пользователя по имени
+  @Get(':username/wishes')
+  async findWishes(@Param('username') userName: string, @AuthUser() user: User): Promise<Wish[]> {
+    const userData = await this.userService.findByName(userName);
+    const wishes = this.wishService.findWishesById(userData.id);
+    if(!wishes) {
+      throw new NotFoundException(`У пользователя нет подароков`);
     }
+    return wishes;
+  }
 }
 
