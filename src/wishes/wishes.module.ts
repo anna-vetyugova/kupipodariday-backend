@@ -8,8 +8,8 @@ import { User } from 'src/users/user.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Wish, User]), 
-    forwardRef(() => UsersModule)
+    TypeOrmModule.forFeature([Wish, User]),
+    forwardRef(() => UsersModule),
   ],
   providers: [WishesService],
   controllers: [WishesController],

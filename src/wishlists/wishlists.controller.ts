@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guard/jwt.auth.guard';
 import { AuthUser } from 'src/common/decorators/user.decorators';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
@@ -7,9 +15,7 @@ import { WishlistsService } from './wishlists.service';
 @UseGuards(JwtAuthGuard)
 @Controller('wishlistlists')
 export class WishlistsController {
-  constructor(
-    private readonly wishlistService: WishlistsService,
-  ){}
+  constructor(private readonly wishlistService: WishlistsService) {}
 
   // создать коллекцию
   @Post()
@@ -35,5 +41,4 @@ export class WishlistsController {
   deleteWish(@Param('id') id: number, @AuthUser() user) {
     return this.wishlistService.deleteWishlist(id, user.id);
   }
-  
 }

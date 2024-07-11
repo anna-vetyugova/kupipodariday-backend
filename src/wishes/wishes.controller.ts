@@ -1,17 +1,22 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guard/jwt.auth.guard';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { WishesService } from './wishes.service';
 import { AuthUser } from 'src/common/decorators/user.decorators';
-import { UsersService } from 'src/users/users.service';
 import { UpdateWishDto } from './dto/update-wish.dto';
 import { Patch } from '@nestjs/common/decorators';
 
 @Controller('wishes')
 export class WishesController {
-  constructor(
-    private readonly wishService: WishesService,
-  ){}
+  constructor(private readonly wishService: WishesService) {}
 
   // создать подарок
   @Post()
@@ -29,7 +34,11 @@ export class WishesController {
   // обновить подарок
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
-  updateWish(@Param('id') id: number, @Body() updateWishDto: UpdateWishDto, @AuthUser() user) {
+  updateWish(
+    @Param('id') id: number,
+    @Body() updateWishDto: UpdateWishDto,
+    @AuthUser() user,
+  ) {
     return this.wishService.updateWish(id, updateWishDto, user.id);
   }
 

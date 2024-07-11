@@ -30,7 +30,7 @@ const schema = Joi.object({
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ 
+    ConfigModule.forRoot({
       validationSchema: schema,
       load: [configuration],
       isGlobal: true,

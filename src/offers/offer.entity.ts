@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+} from 'typeorm';
 import { User } from 'src/users/user.entity';
 import { Wish } from 'src/wishes/wish.entity';
 
@@ -13,10 +20,10 @@ export class Offer {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => User, user => user.offers)
+  @ManyToOne(() => User, (user) => user.offers)
   user: User;
 
-  @ManyToOne(() => Wish, wish => wish.offers)
+  @ManyToOne(() => Wish, (wish) => wish.offers)
   wish: Wish;
 
   @Column('decimal', { precision: 10, scale: 2 })

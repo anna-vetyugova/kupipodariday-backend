@@ -1,4 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, ManyToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  OneToMany,
+  ManyToMany,
+} from 'typeorm';
 import { IsUrl } from 'class-validator';
 import { Length } from 'class-validator';
 import { User } from 'src/users/user.entity';
@@ -37,15 +46,15 @@ export class Wish {
   @Length(1, 1024)
   description: string;
 
-  @OneToMany(() => Offer, offer => offer.wish)
+  @OneToMany(() => Offer, (offer) => offer.wish)
   offers: Offer[];
 
   @Column({ type: 'int', default: 0 })
   copied: number;
 
-  @ManyToOne(() => User, user => user.wishes)
+  @ManyToOne(() => User, (user) => user.wishes)
   owner: User;
 
-  @ManyToMany(() => Wishlist, wishlist => wishlist.items)
+  @ManyToMany(() => Wishlist, (wishlist) => wishlist.items)
   wishlists: Wishlist[];
 }

@@ -1,5 +1,4 @@
-import { IsUrl, IsNumber, IsBoolean } from 'class-validator';
-import { User } from 'src/users/user.entity';
+import { IsNumber, IsBoolean } from 'class-validator';
 
 export class CreateOfferDto {
   @IsNumber()

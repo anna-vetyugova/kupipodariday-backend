@@ -1,7 +1,14 @@
-import { Body, Controller, Post, Req, Param, NotFoundException, BadRequestException, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Param,
+  NotFoundException,
+  BadRequestException,
+  Query,
+} from '@nestjs/common';
 import { Get, Patch, UseGuards } from '@nestjs/common/decorators';
 import { AuthUser } from 'src/common/decorators/user.decorators';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UsersService } from './users.service';
 import { User } from './user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -15,7 +22,7 @@ export class UsersController {
   constructor(
     private readonly userService: UsersService,
     private readonly wishService: WishesService,
-  ){}
+  ) {}
 
   // получить данные по своему профилю
   @Get('me')
@@ -27,11 +34,11 @@ export class UsersController {
         username: true,
         id: true,
         avatar: true,
-        about: true, 
-        createdAt: true, 
+        about: true,
+        createdAt: true,
         updatedAt: true,
       },
-    })
+    });
   }
 
   // получить всех пользователей
@@ -42,8 +49,14 @@ export class UsersController {
 
   // обновить данные по своему профилю
   @Patch('me')
-  async updateOne(@AuthUser() user: User, @Body() updateUserDto: UpdateUserDto): Promise<User> {
-    return this.userService.updateOne({ where: { id: user.id } }, updateUserDto);
+  async updateOne(
+    @AuthUser() user: User,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<User> {
+    return this.userService.updateOne(
+      { where: { id: user.id } },
+      updateUserDto,
+    );
   }
 
   // получить данные профиля по имени
@@ -51,7 +64,9 @@ export class UsersController {
   async getUserProfile(@Param('username') userName: string) {
     const user = await this.userService.findByName(userName);
     if (!user) {
-      throw new NotFoundException(`Пользователь с имененм ${userName} не найден`);
+      throw new NotFoundException(
+        `Пользователь с имененм ${userName} не найден`,
+      );
     }
     return user;
   }
@@ -60,7 +75,9 @@ export class UsersController {
   @Post('find')
   async findMany(@Query('query') query: string) {
     if (!query) {
-      throw new BadRequestException(`Для поиска требуется указать или имя пользователя или его электронный адрес`);
+      throw new BadRequestException(
+        `Для поиска требуется указать или имя пользователя или его электронный адрес`,
+      );
     }
     const user = await this.userService.findMany(query);
     return user;
@@ -70,7 +87,7 @@ export class UsersController {
   @Get('me/wishes')
   async findMyWishes(@AuthUser() user: User): Promise<Wish[]> {
     const wishes = this.wishService.findWishesById(user.id);
-    if(!wishes) {
+    if (!wishes) {
       throw new NotFoundException(`У пользователя нет подароков`);
     }
     return wishes;
@@ -78,13 +95,12 @@ export class UsersController {
 
   // получить список подароков пользователя по имени
   @Get(':username/wishes')
-  async findWishes(@Param('username') userName: string, @AuthUser() user: User): Promise<Wish[]> {
+  async findWishes(@Param('username') userName: string): Promise<Wish[]> {
     const userData = await this.userService.findByName(userName);
     const wishes = this.wishService.findWishesById(userData.id);
-    if(!wishes) {
+    if (!wishes) {
       throw new NotFoundException(`У пользователя нет подароков`);
     }
     return wishes;
   }
 }
-

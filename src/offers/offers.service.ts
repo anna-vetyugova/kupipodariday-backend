@@ -1,9 +1,12 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Offer } from './offer.entity';
 import { CreateOfferDto } from './dto/create-offer.dto';
-import { UpdateOfferDto } from './dto/update-offer.dto';
 import { UsersService } from 'src/users/users.service';
 import { WishesService } from 'src/wishes/wishes.service';
 
@@ -17,20 +20,29 @@ export class OffersService {
   ) {}
 
   async createOffer(createOfferDto: CreateOfferDto, userId: number) {
-    const { amount, itemId, hidden } = createOfferDto;
+    const { amount, itemId } = createOfferDto;
     const user = await this.userService.findById(userId);
     const wish = await this.wishService.findWishById(itemId);
 
     if (wish.owner.id === userId) {
-      throw new ForbiddenException('Нельзя вносить деньги на собственные подарки');
+      throw new ForbiddenException(
+        'Нельзя вносить деньги на собственные подарки',
+      );
     }
-    if (amount > (wish.price - wish.raised)) {
-      throw new ForbiddenException('Сумма собранных средств не может превышатть остаточной стоимость подарка');
+    if (amount > wish.price - wish.raised) {
+      throw new ForbiddenException(
+        'Сумма собранных средств не может превышатть остаточной стоимость подарка',
+      );
     }
-    if (amount > wish.price) {throw new ForbiddenException('Сумма не должна превышать стоимости подарка');
+    if (amount > wish.price) {
+      throw new ForbiddenException(
+        'Сумма не должна превышать стоимости подарка',
+      );
     }
     if (wish.price === wish.raised) {
-      throw new ForbiddenException('Нельзя оставить заявку на сумму равную стоимости подарка');
+      throw new ForbiddenException(
+        'Нельзя оставить заявку на сумму равную стоимости подарка',
+      );
     }
 
     await this.wishService.updateRaisedAmount(wish.id, amount);

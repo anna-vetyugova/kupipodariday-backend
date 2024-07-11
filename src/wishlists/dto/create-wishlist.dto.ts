@@ -1,4 +1,11 @@
-import { IsNotEmpty, IsString, IsUrl, Length, IsNumber, IsOptional, IsArray } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsUrl,
+  Length,
+  IsOptional,
+  IsArray,
+} from 'class-validator';
 
 export class CreateWishlistDto {
   @IsNotEmpty()
@@ -13,7 +20,7 @@ export class CreateWishlistDto {
 
   @IsUrl()
   readonly image?: string;
-  
+
   @IsArray()
   readonly itemsId?: number[];
 }

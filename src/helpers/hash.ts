@@ -1,6 +1,6 @@
 import * as bcrypt from 'bcrypt';
 
-export function hashValue(value: string){
+export function hashValue(value: string) {
   return bcrypt.hash(value, 10);
 }
 

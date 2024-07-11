@@ -13,7 +13,7 @@ import { WishesModule } from 'src/wishes/wishes.module';
   imports: [
     TypeOrmModule.forFeature([Wishlist, User, Wish]),
     forwardRef(() => UsersModule),
-    forwardRef(() => WishesModule)
+    forwardRef(() => WishesModule),
   ],
   providers: [WishlistsService],
   controllers: [WishlistsController],

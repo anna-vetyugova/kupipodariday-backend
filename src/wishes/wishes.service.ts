@@ -1,10 +1,13 @@
-import { Injectable, UseGuards, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
-import { Repository, Like, FindOneOptions } from 'typeorm';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
+import { Repository, FindOneOptions } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Wish } from './wish.entity';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
-import { JwtAuthGuard } from 'src/auth/guard/jwt.auth.guard';
 import { UsersService } from 'src/users/users.service';
 import { BadRequestException } from '@nestjs/common/exceptions';
 
@@ -17,7 +20,10 @@ export class WishesService {
   ) {}
 
   // создать подарок
-  async createWish(createWishDto: CreateWishDto, userId: number): Promise<Wish> {
+  async createWish(
+    createWishDto: CreateWishDto,
+    userId: number,
+  ): Promise<Wish> {
     const owner = await this.userService.findById(userId);
     const wish = this.wishRepository.create({
       ...createWishDto,
@@ -51,8 +57,8 @@ export class WishesService {
     return wish;
   }
 
-  async findWishById(id: number):Promise<Wish> {
-    if(!id) {
+  async findWishById(id: number): Promise<Wish> {
+    if (!id) {
       throw new BadRequestException(`Отсутсвует ИД подарка`);
     }
     const wish = await this.wishRepository.findOne({
@@ -62,15 +68,19 @@ export class WishesService {
     if (!wish) {
       throw new NotFoundException(`Подарок не найден`);
     }
-    wish.offers = wish.offers.map(offer => ({
+    wish.offers = wish.offers.map((offer) => ({
       ...offer,
-      name: offer.user.username, 
+      name: offer.user.username,
     }));
     return wish;
   }
 
   // обновить информацию о подарке
-  async updateWish(wishId: number, updateWishDto: UpdateWishDto, userId: number): Promise<Wish> {
+  async updateWish(
+    wishId: number,
+    updateWishDto: UpdateWishDto,
+    userId: number,
+  ): Promise<Wish> {
     const wish = await this.findWishById(wishId);
     if (wish.owner.id !== userId) {
       throw new ForbiddenException('Вы не можете изменять чужие подарки');
@@ -119,12 +129,12 @@ export class WishesService {
       },
       take: 40,
     });
-    if(!wishes) {
+    if (!wishes) {
       throw new NotFoundException('Последние подарки не найдены');
     }
     return wishes;
   }
-  
+
   //показать популярные подарки
   async getTopWishes() {
     const topWishes = await this.wishRepository.find({
@@ -134,7 +144,7 @@ export class WishesService {
       },
       take: 10,
     });
-    if(!topWishes.length) {
+    if (!topWishes.length) {
       throw new NotFoundException('Популярные подарки не найдены');
     }
     return topWishes;
@@ -142,7 +152,7 @@ export class WishesService {
 
   // получить массиов подароков по ИД
   async getWishesByIds(ids: number[]) {
-    const wishes = await Promise.all(ids.map(id => this.findWishById(id)));
+    const wishes = await Promise.all(ids.map((id) => this.findWishById(id)));
     return wishes;
   }
 
@@ -154,7 +164,7 @@ export class WishesService {
   async copyWish(wishId: number, userId: number): Promise<Wish> {
     // получить данные о подарке по ИД
     const wish = await this.wishRepository.findOne({
-      select: { 
+      select: {
         name: true,
         link: true,
         image: true,
@@ -173,14 +183,13 @@ export class WishesService {
       price: wish.price,
       description: wish.description,
       owner: user,
-      raised: 0, 
-      copied: (wish.copied || 0) + 1, 
+      raised: 0,
+      copied: (wish.copied || 0) + 1,
     });
-    
+
     // обновим признак copied у оригинального подарка
-    const originWish = await this.updateCopiedWish(wishId);
+    await this.updateCopiedWish(wishId);
 
     return this.wishRepository.save(copiedWish);
   }
-
 }

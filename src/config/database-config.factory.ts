@@ -1,7 +1,7 @@
-import { Injectable } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from "@nestjs/typeorm";
-import { join } from "path";
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
+import { join } from 'path';
 
 @Injectable()
 export class DatabaseConfigFactory implements TypeOrmOptionsFactory {
@@ -16,7 +16,7 @@ export class DatabaseConfigFactory implements TypeOrmOptionsFactory {
       password: this.configService.get<string>('database.password'),
       database: this.configService.get<string>('database.name'),
       entities: [join(__dirname, '../**/*.entity{.ts,.js}')],
-      synchronize: true,//this.configService.get<boolean>('jwt.synchronize') || true,
+      synchronize: true, //this.configService.get<boolean>('jwt.synchronize') || true,
       logging: true,
     };
   }
