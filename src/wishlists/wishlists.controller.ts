@@ -4,12 +4,14 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guard/jwt.auth.guard';
 import { AuthUser } from 'src/common/decorators/user.decorators';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
+import { UpdateWishlistDto } from './dto/update-wishlist.dto';
 import { WishlistsService } from './wishlists.service';
 
 @UseGuards(JwtAuthGuard)
@@ -38,7 +40,18 @@ export class WishlistsController {
   // удалить коллекцию
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  deleteWish(@Param('id') id: number, @AuthUser() user) {
+  deleteWishlist(@Param('id') id: number, @AuthUser() user) {
     return this.wishlistService.deleteWishlist(id, user.id);
+  }
+
+  // изменить коллекцию
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard)
+  changeWishlist(
+    @Param('id') id: number,
+    @AuthUser() user,
+    @Body() updateWishlistDto: UpdateWishlistDto,
+  ) {
+    return this.wishlistService.changeWishlist(id, user.id, updateWishlistDto);
   }
 }

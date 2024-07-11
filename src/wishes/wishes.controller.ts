@@ -55,7 +55,7 @@ export class WishesController {
     return this.wishService.getLastWishes();
   }
 
-  @Get('/top')
+  @Get('top')
   getTopWishes() {
     return this.wishService.getTopWishes();
   }

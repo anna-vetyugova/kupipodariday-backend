@@ -9,6 +9,7 @@ import { Wishlist } from './wishlist.entity';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
 import { User } from 'src/users/user.entity';
 import { WishesService } from 'src/wishes/wishes.service';
+import { UpdateWishlistDto } from './dto/update-wishlist.dto';
 
 @Injectable()
 export class WishlistsService {
@@ -64,5 +65,27 @@ export class WishlistsService {
       throw new ForbiddenException('Вы не можете удалять чужие коллекции');
     }
     return await this.wishlistRepository.remove(wishlist);
+  }
+
+  // изменить коллекцию
+  async changeWishlist(
+    id: number,
+    userId: number,
+    updateWishlistDto: UpdateWishlistDto,
+  ): Promise<Wishlist> {
+    const wishlist = await this.wishlistRepository.findOne({
+      where: {
+        id: id,
+      },
+      relations: ['items', 'owner'],
+    });
+    if (!wishlist) {
+      throw new NotFoundException(`Коллекция не найдена`);
+    }
+    if (wishlist.owner.id !== userId) {
+      throw new ForbiddenException('Вы не можете изменять чужую коллекцию');
+    }
+
+    return this.wishlistRepository.save({ ...wishlist, ...updateWishlistDto });
   }
 }
