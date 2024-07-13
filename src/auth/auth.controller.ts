@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Post,
-  Body,
-  UseGuards,
-  BadRequestException,
-} from '@nestjs/common';
+import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { LocalAuthGuard } from './guard/local-auth.guard';
@@ -21,22 +15,11 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('signin')
   login(@AuthUser() user): Promise<any> {
-    if (!user) {
-      throw new BadRequestException(`Некорректный email или пароль`);
-    }
     return this.authService.login(user);
   }
 
   @Post('signup')
   async signup(@Body() createUserDto: CreateUserDto) {
-    const user = await this.usersService.findByEmail(createUserDto.email);
-    if (user) {
-      throw new BadRequestException(
-        `Пользователь с указанным email уже существует`,
-      );
-    }
-
-    const newUser = await this.usersService.signup(createUserDto);
-    return newUser;
+    return await this.usersService.signup(createUserDto);
   }
 }

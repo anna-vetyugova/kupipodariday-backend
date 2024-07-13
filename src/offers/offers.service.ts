@@ -3,12 +3,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Offer } from './offer.entity';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { UsersService } from 'src/users/users.service';
 import { WishesService } from 'src/wishes/wishes.service';
+import { Wish } from 'src/wishes/wish.entity';
 
 @Injectable()
 export class OffersService {
@@ -17,6 +18,7 @@ export class OffersService {
     private readonly offerRepository: Repository<Offer>,
     private readonly userService: UsersService,
     private readonly wishService: WishesService,
+    private dataSource: DataSource,
   ) {}
 
   async createOffer(createOfferDto: CreateOfferDto, userId: number) {
@@ -45,12 +47,29 @@ export class OffersService {
       );
     }
 
-    await this.wishService.updateRaisedAmount(wish.id, amount);
-    return await this.offerRepository.save({
-      ...createOfferDto,
-      user: user,
-      item: wish,
-    });
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      await queryRunner.manager.save(Wish, {
+        ...wish,
+        raised: Number(wish.raised) + amount,
+      });
+      const offer = await queryRunner.manager.save(Offer, {
+        ...createOfferDto,
+        item: wish,
+        user: user,
+      });
+      await queryRunner.commitTransaction();
+      return offer;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+    // await this.wishService.updateRaisedAmount(wish.id, amount);
   }
 
   async getAllOffers(): Promise<Offer[]> {

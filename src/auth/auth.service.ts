@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { verifyHash } from 'src/helpers/hash';
 import { User } from 'src/users/user.entity';
@@ -16,7 +16,9 @@ export class AuthService {
       select: { username: true, password: true, id: true },
       where: { username },
     });
-
+    if (!user) {
+      throw new BadRequestException(`Некорректный email или пароль`);
+    }
     if (user && (await verifyHash(password, user.password))) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...result } = user;

@@ -9,7 +9,10 @@ import { Wish } from './wish.entity';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
 import { UsersService } from 'src/users/users.service';
-import { BadRequestException } from '@nestjs/common/exceptions';
+import {
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common/exceptions';
 
 @Injectable()
 export class WishesService {
@@ -37,9 +40,11 @@ export class WishesService {
     const wishes = await this.wishRepository.find({
       where: { owner: { id: userId } },
     });
-    // if (!wishes.length) {
-    //   throw new NotFoundException(`Подарки для текущего пользователя не найдены`);
-    // }
+    if (!wishes.length) {
+      throw new NotFoundException(
+        `Подарки для текущего пользователя не найдены`,
+      );
+    }
     return wishes;
   }
 
@@ -176,6 +181,19 @@ export class WishesService {
 
     // получить юзера, кто копирует
     const user = await this.userService.findById(userId);
+
+    // проверим, что подарок не был скопирован ранее
+    const existingCopy = await this.wishRepository.findOne({
+      where: {
+        owner: { id: userId },
+        name: wish.name,
+        link: wish.link,
+      },
+    });
+
+    if (existingCopy) {
+      throw new ConflictException(`Вы уже скопировали этот подарок`);
+    }
     const copiedWish = this.wishRepository.create({
       name: wish.name,
       link: wish.link,

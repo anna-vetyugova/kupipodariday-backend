@@ -5,7 +5,11 @@ import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { hashValue } from 'src/helpers/hash';
-import { NotFoundException } from '@nestjs/common/exceptions';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common/exceptions';
 import { JwtAuthGuard } from 'src/auth/guard/jwt.auth.guard';
 @Injectable()
 export class UsersService {
@@ -15,7 +19,13 @@ export class UsersService {
   ) {}
 
   async signup(createUserDto: CreateUserDto): Promise<User> {
-    const { password } = createUserDto;
+    const { password, email } = createUserDto;
+    const newUser = await this.userRepository.findOne({ where: { email } });
+    if (newUser) {
+      throw new BadRequestException(
+        `Пользователь с указанным email уже существует`,
+      );
+    }
     const user = await this.userRepository.create({
       ...createUserDto,
       password: await hashValue(password),
@@ -57,6 +67,7 @@ export class UsersService {
       },
       where: { username },
     });
+
     if (!user) {
       throw new NotFoundException(`Пользователь ${username} не найден`);
     }
@@ -65,6 +76,11 @@ export class UsersService {
 
   @UseGuards(JwtAuthGuard)
   async findMany(query: string): Promise<User> {
+    if (!query) {
+      throw new BadRequestException(
+        `Для поиска требуется указать или имя пользователя или его электронный адрес`,
+      );
+    }
     const user = await this.userRepository.findOne({
       select: {
         username: true,
@@ -94,13 +110,34 @@ export class UsersService {
   }
 
   @UseGuards(JwtAuthGuard)
-  async updateOne(query: FindOneOptions<User>, updateUserDto: UpdateUserDto) {
-    const { password } = updateUserDto;
-    const user = await this.userRepository.findOne(query);
+  async updateOne(userId: number, updateUserDto: UpdateUserDto) {
+    const { password, email, username } = updateUserDto;
+    // находим данные текущего пользователя
+    const user = await this.findById(userId);
+    if (email && user.email !== email) {
+      const userByEmail = await this.userRepository.findOne({
+        where: { email },
+      });
+      if (userByEmail) {
+        throw new ConflictException(
+          `Пользователь с такой электронной почтой уже существует`,
+        );
+      }
+    }
+    if (username && user.username !== username) {
+      const userByName = await this.userRepository.findOne({
+        where: { username },
+      });
+      if (userByName) {
+        throw new ConflictException(
+          `Пользователь с таким именем уже существует`,
+        );
+      }
+    }
     if (password) {
       updateUserDto.password = await hashValue(password);
     }
-    return this.userRepository.save({ ...user, ...updateUserDto });
+    return this.userRepository.save({ id: userId, ...updateUserDto });
   }
 
   @UseGuards(JwtAuthGuard)
